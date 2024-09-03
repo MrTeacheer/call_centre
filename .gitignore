@@ -171,3 +171,5 @@ media/
 
 */migrations/
 **/migrations/
+
+.idea

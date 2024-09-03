@@ -56,5 +56,61 @@ class Group(models.Model):
         return self.name
 
 
+class Replacement(models.Model):
+    group = models.ForeignKey(Group,
+                                    on_delete=models.CASCADE,
+                                    related_name='replacements_group',
+                                    verbose_name='Группа')
+    date=models.DateField(verbose_name='Дата смены')
+    break_start=models.TimeField(verbose_name='время начала обеда')
+    break_finish=models.TimeField(verbose_name='время окончания обеда')
+    break_max_duration=models.PositiveSmallIntegerField(verbose_name='макс длит обеда')
+    class Meta:
+        verbose_name='Смена'
+        verbose_name_plural='Смены'
+        ordering=('-date',)
+
+    def __str__(self):
+        return f'смена для: {self.group}'
 
 
+class ReplacementStatus(models.Model):
+    code=models.CharField(max_length=16,
+                          verbose_name='Код')
+    name=models.CharField(max_length=255,
+                          verbose_name='Название')
+    sort= models.PositiveIntegerField(verbose_name='Сортировка',
+                                      null=True,
+                                      blank=True)
+    is_active=models.BooleanField(default=True,
+                                  verbose_name='Активность')
+
+    class Meta:
+        verbose_name='Статус смены'
+        verbose_name_plural='Статусы смены'
+        ordering=('sort',)
+
+    def __str__(self):
+        return f'{self.code} для {self.name}'
+
+
+class ReplacementEmployee(models.Model):
+    replacement = models.ForeignKey(Replacement,
+                                    on_delete=models.CASCADE,
+                                    related_name='employees',
+                                    verbose_name='смена')
+    employee = models.ForeignKey(User,
+                                 on_delete=models.CASCADE,
+                                 related_name='replacements',
+                                 verbose_name='Сотрудник')
+    status = models.ForeignKey(ReplacementStatus,
+                               on_delete=models.RESTRICT,
+                               related_name='replacement_employees',
+                               verbose_name='Статус')
+
+    class Meta:
+        verbose_name='Смена-работника'
+        verbose_name_plural='Смены-работников'
+
+    def __str__(self):
+        return f'{self.replacement} для {self.employee}'
